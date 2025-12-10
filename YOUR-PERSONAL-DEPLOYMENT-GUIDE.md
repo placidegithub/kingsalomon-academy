@@ -62,8 +62,18 @@ git commit -m "Ready for deployment to Render"
    - Pick one you like!
 5. Verify your email (check your inbox)
 
-### 1.5 Create Repository on GitHub
+### 1.5 Check Your Existing Repository
 
+I see you already have a GitHub repository connected:
+- **Current repository**: `placidegithub/kingsalomon-media`
+
+**You have two options:**
+
+**Option A: Use Existing Repository (Easier!)**
+- Just push your code to the existing repository
+- Skip to Step 1.6
+
+**Option B: Create New Repository with Username "kingsalomon"**
 1. After logging in, click the **"+"** icon (top right)
 2. Click **"New repository"**
 3. Fill in:
@@ -71,33 +81,29 @@ git commit -m "Ready for deployment to Render"
    - **Description**: `King Salomon Academy Media Management System`
    - **Visibility**: Choose **Public** (free) or **Private**
    - **DO NOT** check "Initialize with README"
-   - **DO NOT** add .gitignore or license
 4. Click **"Create repository"**
+5. Then update your remote (see Step 1.6)
 
-### 1.6 Connect and Push Your Code
+### 1.6 Push Your Code
 
-GitHub will show you some commands. In your Command Prompt, run these:
+**If using existing repository (Option A):**
 
-**First, set your Git identity (if not already set):**
+Just commit and push:
 ```bash
-git config --global user.name "kingsalomon"
-git config --global user.email "placidehenry0@gmail.com"
+git commit -m "Ready for deployment - all files prepared"
+git push
 ```
 
-**Then connect to GitHub:**
+**If creating new repository (Option B):**
+
+First, update your remote:
 ```bash
-git remote add origin https://github.com/kingsalomon/kingsalomon-academy.git
+git remote set-url origin https://github.com/kingsalomon/kingsalomon-academy.git
 ```
 
-**If you used a different username (like kingsalomon1), use that instead!**
-
-**Set main branch:**
+Then commit and push:
 ```bash
-git branch -M main
-```
-
-**Push your code:**
-```bash
+git commit -m "Ready for deployment - all files prepared"
 git push -u origin main
 ```
 
@@ -384,7 +390,7 @@ When you want to update your app:
 
 - **Email**: placidehenry0@gmail.com
 - **GitHub Username**: kingsalomon
-- **GitHub Repository**: github.com/kingsalomon/kingsalomon-academy
+- **GitHub Repository**: github.com/placidegithub/kingsalomon-media (or your new one)
 - **Render Service**: kingsalomon-academy
 - **Your App URL**: https://kingsalomon-academy.onrender.com
 - **Admin Username**: admin
