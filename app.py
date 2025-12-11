@@ -693,9 +693,13 @@ if __name__ == '__main__':
 
     app.run(debug=True, host='0.0.0.0', port=5000)
 
-# Ensure default admin exists even when running via WSGI or other entry points
-@app.before_first_request
+# Ensure default admin exists even when running via WSGI or other entry points.
+# Flask 3.1 removed before_first_request; use a one-time guard with before_request.
+@app.before_request
 def ensure_default_admin():
+    if getattr(app, "_init_done", False):
+        return
+    app._init_done = True
     try:
         # Ensure schema exists and includes approval_status
         try:
