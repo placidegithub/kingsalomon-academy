@@ -71,7 +71,8 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     phone_number = db.Column(db.String(20), nullable=True)
-    password_hash = db.Column(db.String(120), nullable=False)
+    # Use larger size to fit modern password hashes (e.g., scrypt, pbkdf2)
+    password_hash = db.Column(db.String(255), nullable=False)
     # student, teacher, admin
     role = db.Column(db.String(20), default='student')
     full_name = db.Column(db.String(100), nullable=False)
@@ -701,8 +702,10 @@ def ensure_default_admin():
         return
     app._init_done = True
     try:
+        db_uri = app.config['SQLALCHEMY_DATABASE_URI']
+
         # If using SQLite, ensure approval_status column exists (PRAGMA only works on SQLite)
-        if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
+        if db_uri.startswith('sqlite'):
             try:
                 result = db.session.execute(db.text("PRAGMA table_info(user)"))
                 columns = [row[1] for row in result.fetchall()]
@@ -713,6 +716,15 @@ def ensure_default_admin():
                     db.session.commit()
             except Exception as e:
                 print(f"SQLite schema check/add column failed (may be already applied): {e}")
+        else:
+            # On Postgres, ensure password_hash column is wide enough
+            try:
+                db.session.execute(db.text('ALTER TABLE "user" ALTER COLUMN password_hash TYPE VARCHAR(255)'))
+                db.session.commit()
+            except Exception as e:
+                # Ignore if already applied or if table doesn't exist yet
+                db.session.rollback()
+                print(f"Postgres column adjust (password_hash to 255) note: {e}")
 
         # Create tables (safe on Postgres too)
         db.create_all()
