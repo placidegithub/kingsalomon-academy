@@ -701,20 +701,23 @@ def ensure_default_admin():
         return
     app._init_done = True
     try:
-        # Ensure schema exists and includes approval_status
-        try:
-            # For SQLite, check columns
-            result = db.session.execute(db.text("PRAGMA table_info(user)"))
-            columns = [row[1] for row in result.fetchall()]
-            if 'approval_status' not in columns:
-                db.session.execute(db.text("ALTER TABLE user ADD COLUMN approval_status VARCHAR(20)"))
-                db.session.commit()
-                # Default existing users to approved
-                db.session.execute(db.text("UPDATE user SET approval_status = 'approved' WHERE approval_status IS NULL"))
-                db.session.commit()
-        except Exception as e:
-            print(f"Schema check/add column failed (may be non-SQLite or already exists): {e}")
+        # If using SQLite, ensure approval_status column exists (PRAGMA only works on SQLite)
+        if app.config['SQLALCHEMY_DATABASE_URI'].startswith('sqlite'):
+            try:
+                result = db.session.execute(db.text("PRAGMA table_info(user)"))
+                columns = [row[1] for row in result.fetchall()]
+                if 'approval_status' not in columns:
+                    db.session.execute(db.text("ALTER TABLE user ADD COLUMN approval_status VARCHAR(20)"))
+                    db.session.commit()
+                    db.session.execute(db.text("UPDATE user SET approval_status = 'approved' WHERE approval_status IS NULL"))
+                    db.session.commit()
+            except Exception as e:
+                print(f"SQLite schema check/add column failed (may be already applied): {e}")
+
+        # Create tables (safe on Postgres too)
         db.create_all()
+
+        # Ensure admin user
         admin = User.query.filter_by(username='admin').first()
         if not admin:
             admin = User(
